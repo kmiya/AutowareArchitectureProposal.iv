@@ -40,7 +40,7 @@ jobs:
       - name: Run action-ros-ci
         continue-on-error: true
         id: action_ros_ci_step
-        uses: ros-tooling/action-ros-ci@v0.2
+        uses: ros-tooling/action-ros-ci@v0.1
         with:
           package-name: ${{ env.PACKAGE_NAMES }}
           target-ros2-distro: foxy
@@ -54,7 +54,7 @@ jobs:
           # If possible, pin the repository in the workflow to a specific commit to avoid
           # changes in colcon-mixin-repository from breaking your tests.
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
-          extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety'
+          extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
 
       - name: Checkout CodeChecker
         uses: actions/checkout@v2
