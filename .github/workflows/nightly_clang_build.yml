@@ -55,11 +55,10 @@ jobs:
           cd ~/codechecker
 
           # Got 'bdist_wheel' error? No problem. See https://github.com/Ericsson/codechecker/issues/3108#issuecomment-748120874
-          make venv || true
-          source ./venv/bin/activate
+          pip3 install -r ./analyzer/requirements.txt
 
           # Build CodeChecker without the web UI.
-          $ BUILD_UI_DIST=NO make package
+          BUILD_UI_DIST=NO make package
 
           run: echo "${GITHUB_WORKSPACE}/build/CodeChecker/bin" >> ${GITHUB_PATH}
           cd ..
