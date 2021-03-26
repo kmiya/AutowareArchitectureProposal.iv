@@ -51,23 +51,6 @@ jobs:
       #     colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
       #     extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
 
-      # - name: Setup Python for CodeChecker
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.6
-
-      # # Ref. https://docs.github.com/en/actions/guides/building-and-testing-python#caching-dependencies
-      # - name: Cache pip
-      #   uses: actions/cache@v2
-      #   with:
-      #     # This path is specific to Ubuntu
-      #     path: ~/.cache/pip
-      #     # Look to see if there is a cache hit for the corresponding requirements file
-      #     key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pip-
-      #       ${{ runner.os }}-
-
       - name: Checkout CodeChecker
         uses: actions/checkout@v2
         with:
@@ -80,12 +63,7 @@ jobs:
         id: codechecker
         run: |
           apt-get update;
-          apt-get install libxslt1-dev \
-                          gcc-multilib \
-                          python-pip-whl \
-                          python3-portalocker \
-                          python3-venv \
-                          -y
+          apt-get install gcc-multilib -y
           cd codechecker
 
           # Got 'bdist_wheel' error? No problem.
