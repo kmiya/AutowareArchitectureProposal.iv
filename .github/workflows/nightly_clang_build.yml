@@ -106,6 +106,9 @@ jobs:
       - name: Analyse using Clang-Tidy
         run: |
           echo ${PWD}
+          ls
+          ls codechecker
+          ls ../
           . "${PWD}/codechecker/venv/bin/activate"
           export PATH="${PWD}/codechecker/build/CodeChecker/bin:$PATH"
           CodeChecker analyze ../build/compile_commands.json --config ../codechecker-config.json --output ./reports
