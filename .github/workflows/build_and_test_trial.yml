@@ -1,48 +1,38 @@
 name: Build and test
 
 on:
-  pull_request:
-    branches:
-      - ros2
-      - ros2-ci-test
-      - ros2-v0.8.0-beta
-      - ros2-v0.9.0-beta
-  push:
-    branches:
-      - ros2
-      - ros2-ci-test
-      - ros2-v0.8.0-beta
-      - ros2-v0.9.0-beta
+  workflow_dispatch:
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     container: ubuntu:focal
 
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 2  # https://github.com/codecov/codecov-action/issues/190#issuecomment-790729633
+      - name: Check out repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2 # https://github.com/codecov/codecov-action/issues/190#issuecomment-790729633
 
-    - name: Setup ROS environment
-      uses: ros-tooling/setup-ros@v0.1
-      with:
-        required-ros-distributions: foxy
+      - name: Setup ROS environment
+        uses: ros-tooling/setup-ros@v0.1
+        with:
+          required-ros-distributions: foxy
 
-    - name: Store all package names to ENV
-      run: |
-        mkdir vcs_dir
-        vcs import vcs_dir/ < build_depends.repos
-        echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> $GITHUB_ENV
+      - name: Store all package names to ENV
+        run: |
+          mkdir vcs_dir
+          vcs import vcs_dir/ < build_depends.repos
+          echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> $GITHUB_ENV
 
-    - name: Run action-ros-ci
-      id: action_ros_ci_step
-      uses: ros-tooling/action-ros-ci@v0.1
-      with:
-        package-name: ${{ env.PACKAGE_NAMES }}
-        target-ros2-distro: foxy
-        vcs-repo-file-url: build_depends.repos
-        colcon-mixin-name: coverage-gcc coverage-pytest
-        # If possible, pin the repository in the workflow to a specific commit to avoid
-        # changes in colcon-mixin-repository from breaking your tests.
-        colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
+      - name: Run action-ros-ci
+        id: action_ros_ci_step
+        uses: ros-tooling/action-ros-ci@v0.1
+        with:
+          package-name: ${{ env.PACKAGE_NAMES }}
+          target-ros2-distro: foxy
+          vcs-repo-file-url: build_depends.repos
+          colcon-mixin-name: coverage-gcc coverage-pytest
+          # If possible, pin the repository in the workflow to a specific commit to avoid
+          # changes in colcon-mixin-repository from breaking your tests.
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
