@@ -29,7 +29,7 @@ jobs:
 
       - name: Install Clang-Tidy and OpenMP lib for Clang
         run: |
-          sudo apt install -y clang-tidy-11 libomp-dev
+          sudo apt-get install -y clang-tidy-11 libomp-dev
 
       # - name: Run action-ros-ci
       #   continue-on-error: true
@@ -50,14 +50,14 @@ jobs:
         continue-on-error: true # may get 'bdist_wheel' error
         run: |
           # Instruction https://github.com/Ericsson/codechecker#linux
-          sudo apt install -y doxygen gcc-multilib python3-dev python3-venv
+          sudo apt-get install -y doxygen gcc-multilib python3-dev python3-venv
 
           git clone https://github.com/Ericsson/CodeChecker.git --depth 1 codechecker
           cd codechecker
 
           # Got 'bdist_wheel' error? No problem. See https://github.com/Ericsson/codechecker/issues/3108#issuecomment-748120874
           make venv || true
-          source ${GITHUB_PATH}/codechecker/venv/bin/activate
+          . ${GITHUB_PATH}/codechecker/venv/bin/activate
 
           # Build CodeChecker without the web UI.
           BUILD_UI_DIST=NO make package
@@ -66,7 +66,7 @@ jobs:
 
       - name: Analyse using Clang-Tidy
         run: |
-          source ${GITHUB_PATH}/codechecker/venv/bin/activate
+          . ${GITHUB_PATH}/codechecker/venv/bin/activate
           CodeChecker analyze build/compile_commands.json --config codechecker-config.json --output ./reports
           CodeChecker parse -e html ./reports -o ./public/pr-check/main/tidy-reports --trim-path-prefix ${GITHUB_WORKSPACE}
 
