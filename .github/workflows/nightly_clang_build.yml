@@ -91,7 +91,8 @@ jobs:
                           python3-venv \
                           python3-virtualenv \
                           python3-wheel \
-                          python3-yaml
+                          python3-yaml \
+                          -y
           cd codechecker
 
           # Got 'bdist_wheel' error? No problem.
