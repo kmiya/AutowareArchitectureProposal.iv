@@ -56,7 +56,8 @@ jobs:
           cd codechecker
 
           # Got 'bdist_wheel' error? No problem. See https://github.com/Ericsson/codechecker/issues/3108#issuecomment-748120874
-          pip3 install -r ./analyzer/requirements.txt || true
+          pip3 install -r $(CC_ANALYZER)/requirements.txt || true
+          pip3 install -r $(CC_WEB)/requirements.txt || true
 
           # Build CodeChecker without the web UI.
           BUILD_UI_DIST=NO make package
