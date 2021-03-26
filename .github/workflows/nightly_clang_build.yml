@@ -62,7 +62,6 @@ jobs:
         id: codechecker
         # General Instruction https://github.com/Ericsson/codechecker#linux
         run: |
-          apt-get update;
           apt-get install gcc-multilib python3-venv -y
           cd codechecker
 
