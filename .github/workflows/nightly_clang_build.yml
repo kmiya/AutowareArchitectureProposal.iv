@@ -46,6 +46,7 @@ jobs:
       #     extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
 
       - name: Install CodeChecker
+        id: codechecker
         continue-on-error: true # may get 'bdist_wheel' error
         run: |
           # Instruction https://github.com/Ericsson/codechecker#linux
@@ -60,13 +61,15 @@ jobs:
           # Build CodeChecker without the web UI.
           BUILD_UI_DIST=NO make package
 
-          echo "${GITHUB_WORKSPACE}/build/CodeChecker/bin" >> ${GITHUB_PATH}
+          echo "::set-output name=CodeCheckerBin::${GITHUB_WORKSPACE}/build/CodeChecker/bin/CodeChecker"
           cd ..
 
       - name: Analyse using Clang-Tidy
         run: |
-          CodeChecker analyze build/compile_commands.json --config codechecker-config.json --output ./reports
-          CodeChecker parse -e html ./reports -o ./public/pr-check/main/tidy-reports --trim-path-prefix ${PWD}
+          ${CodeChecker} analyze build/compile_commands.json --config codechecker-config.json --output ./reports
+          ${CodeChecker} CodeChecker parse -e html ./reports -o ./public/pr-check/main/tidy-reports --trim-path-prefix ${GITHUB_WORKSPACE}
+        env:
+          CodeChecker: ${{ steps.codechecker.outputs.CodeCheckerBin }}
 
       - name: Deploy analyse results to gh-pages
         uses: peaceiris/actions-gh-pages@v3
