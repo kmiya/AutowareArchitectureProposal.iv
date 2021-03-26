@@ -60,7 +60,7 @@ jobs:
           # Build CodeChecker without the web UI.
           BUILD_UI_DIST=NO make package
 
-          run: echo "${GITHUB_WORKSPACE}/build/CodeChecker/bin" >> ${GITHUB_PATH}
+          echo "${GITHUB_WORKSPACE}/build/CodeChecker/bin" >> ${GITHUB_PATH}
           cd ..
 
       - name: Analyse using Clang-Tidy
