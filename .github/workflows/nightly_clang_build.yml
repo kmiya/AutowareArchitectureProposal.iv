@@ -1,0 +1,86 @@
+name: Clang(-Tidy) nightly build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 19 * * *" # run at 4 AM JST
+
+jobs:
+  build-using-clang:
+    runs-on: ubuntu-latest
+    container: ubuntu:focal
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+
+      - name: Setup ROS environment
+        uses: ros-tooling/setup-ros@v0.1
+        with:
+          required-ros-distributions: foxy
+
+      - name: Install Clang-Tidy and OpenMP lib for Clang
+        run: |
+          # Install deps https://github.com/Ericsson/codechecker/blob/master/.github/workflows/install-deps.sh
+          apt-get update -q
+
+          apt-get install -y clang-11 clang-tidy-11 libomp-dev
+          update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 9999
+          update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 9999
+          update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-11 9999
+
+      - name: Store all package names to ENV
+        run: |
+          mkdir vcs_dir
+          vcs import vcs_dir < build_depends.repos
+          echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> ${GITHUB_ENV}
+
+      - name: Run action-ros-ci
+        # continue-on-error: true
+        uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          package-name: ${{ env.PACKAGE_NAMES }}
+          target-ros2-distro: foxy
+          vcs-repo-file-url: build_depends.repos
+          colcon-defaults: |
+            {
+              "build": {
+                "mixin": ["release", "compile-commands"]
+              }
+            }
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
+          # extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
+
+      - name: Checkout CodeChecker
+        uses: actions/checkout@v2
+        with:
+          repository: "Ericsson/codechecker"
+          path: "codechecker"
+          fetch-depth: "1"
+
+      - name: Install CodeChecker
+        id: codechecker
+        # General Instruction https://github.com/Ericsson/codechecker#linux
+        run: |
+          apt-get install gcc-multilib python3-venv -y
+          cd codechecker
+
+          # Got 'bdist_wheel' error? No problem.
+          # See https://github.com/Ericsson/codechecker/issues/3108#issuecomment-748120874
+          make venv || true
+          . "${PWD}/venv/bin/activate"
+          BUILD_UI_DIST=NO make package || true
+
+      - name: Analyse using Clang-Tidy
+        run: |
+          . "${PWD}/codechecker/venv/bin/activate"
+          export PATH="${PWD}/codechecker/build/CodeChecker/bin:$PATH"
+          CodeChecker analyze build/compile_commands.json --config codechecker-config.json --output ./reports
+          CodeChecker parse -e html ./reports -o ./public/pr-check/main/tidy-reports --trim-path-prefix ${GITHUB_WORKSPACE}
+
+      - name: Deploy analyse results to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          keep_files: true
