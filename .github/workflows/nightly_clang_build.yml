@@ -63,7 +63,7 @@ jobs:
         id: codechecker
         run: |
           apt-get update;
-          apt-get install gcc-multilib -y
+          apt-get install gcc-multilib python3-venv -y
           cd codechecker
 
           # Got 'bdist_wheel' error? No problem.
