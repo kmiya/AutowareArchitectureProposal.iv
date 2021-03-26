@@ -21,11 +21,11 @@ jobs:
         with:
           required-ros-distributions: foxy
 
-      # - name: Store all package names to ENV
-      #   run: |
-      #     mkdir dependency_ws
-      #     vcs import dependency_ws < build_depends.repos
-      #     echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> $GITHUB_ENV
+      - name: Store all package names to ENV
+        run: |
+          mkdir dependency_ws
+          vcs import dependency_ws < build_depends.repos
+          echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Install Clang-Tidy and OpenMP lib for Clang
         run: |
@@ -37,19 +37,19 @@ jobs:
           update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 9999
           update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-11 9999
 
-      # - name: Run action-ros-ci
-      #   continue-on-error: true
-      #   id: action_ros_ci_step
-      #   uses: ros-tooling/action-ros-ci@v0.2
-      #   with:
-      #     package-name: ${{ env.PACKAGE_NAMES }}
-      #     target-ros2-distro: foxy
-      #     vcs-repo-file-url: build_depends.repos
-      #     colcon-mixin-name: release compile-commands
-      #     # If possible, pin the repository in the workflow to a specific commit to avoid
-      #     # changes in colcon-mixin-repository from breaking your tests.
-      #     colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
-      #     extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
+      - name: Run action-ros-ci
+        continue-on-error: true
+        id: action_ros_ci_step
+        uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          package-name: ${{ env.PACKAGE_NAMES }}
+          target-ros2-distro: foxy
+          vcs-repo-file-url: build_depends.repos
+          colcon-mixin-name: release compile-commands
+          # If possible, pin the repository in the workflow to a specific commit to avoid
+          # changes in colcon-mixin-repository from breaking your tests.
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
+          extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
 
       - name: Checkout CodeChecker
         uses: actions/checkout@v2
@@ -58,9 +58,9 @@ jobs:
           path: "codechecker"
           fetch-depth: "1"
 
-      # General Instruction https://github.com/Ericsson/codechecker#linux
       - name: Install CodeChecker
         id: codechecker
+        # General Instruction https://github.com/Ericsson/codechecker#linux
         run: |
           apt-get update;
           apt-get install gcc-multilib python3-venv -y
