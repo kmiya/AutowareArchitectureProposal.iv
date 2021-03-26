@@ -46,6 +46,7 @@ jobs:
           extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
 
       - name: Install CodeChecker
+        continue-on-error: true # may get 'bdist_wheel' error
         run: |
           # Instruction https://github.com/Ericsson/codechecker#linux
           sudo apt install -y doxygen gcc-multilib python3-dev python3-venv
