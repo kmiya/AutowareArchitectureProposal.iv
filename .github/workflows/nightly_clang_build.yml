@@ -71,6 +71,15 @@ jobs:
           make venv || true
           . "${PWD}/venv/bin/activate"
           BUILD_UI_DIST=NO make package || true
+
+      - name: debug
+        run: |
+          ls
+          echo "---"
+          ls build
+          echo "---"
+          ls build/autoware_planning_msgs
+          echo "---"
           find . -name compile_commands.json
 
       - name: Analyse using Clang-Tidy
