@@ -39,8 +39,7 @@ jobs:
         continue-on-error: true
         uses: ros-tooling/action-ros-ci@v0.2
         with:
-          # package-name: ${{ env.PACKAGE_NAMES }}
-          package-name: autoware_planning_msgs
+          package-name: ${{ env.PACKAGE_NAMES }}
           target-ros2-distro: foxy
           vcs-repo-file-url: build_depends.repos
           colcon-defaults: |
