@@ -16,34 +16,34 @@ jobs:
         with:
           ref: ros2
 
-      - name: Setup ROS environment
-        uses: ros-tooling/setup-ros@v0.1
-        with:
-          required-ros-distributions: foxy
+      # - name: Setup ROS environment
+      #   uses: ros-tooling/setup-ros@v0.1
+      #   with:
+      #     required-ros-distributions: foxy
 
-      - name: Store all package names to ENV
-        run: |
-          mkdir dependency_ws
-          vcs import dependency_ws < build_depends.repos
-          echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> $GITHUB_ENV
+      # - name: Store all package names to ENV
+      #   run: |
+      #     mkdir dependency_ws
+      #     vcs import dependency_ws < build_depends.repos
+      #     echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Install Clang-Tidy and OpenMP lib for Clang
         run: |
           sudo apt install -y clang-tidy-11 libomp-dev
 
-      - name: Run action-ros-ci
-        continue-on-error: true
-        id: action_ros_ci_step
-        uses: ros-tooling/action-ros-ci@v0.2
-        with:
-          package-name: ${{ env.PACKAGE_NAMES }}
-          target-ros2-distro: foxy
-          vcs-repo-file-url: build_depends.repos
-          colcon-mixin-name: release compile-commands
-          # If possible, pin the repository in the workflow to a specific commit to avoid
-          # changes in colcon-mixin-repository from breaking your tests.
-          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
-          extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
+      # - name: Run action-ros-ci
+      #   continue-on-error: true
+      #   id: action_ros_ci_step
+      #   uses: ros-tooling/action-ros-ci@v0.2
+      #   with:
+      #     package-name: ${{ env.PACKAGE_NAMES }}
+      #     target-ros2-distro: foxy
+      #     vcs-repo-file-url: build_depends.repos
+      #     colcon-mixin-name: release compile-commands
+      #     # If possible, pin the repository in the workflow to a specific commit to avoid
+      #     # changes in colcon-mixin-repository from breaking your tests.
+      #     colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
+      #     extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
 
       - name: Install CodeChecker
         continue-on-error: true # may get 'bdist_wheel' error
@@ -51,17 +51,16 @@ jobs:
           # Instruction https://github.com/Ericsson/codechecker#linux
           sudo apt install -y doxygen gcc-multilib python3-dev python3-venv
 
-          curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-
           git clone https://github.com/Ericsson/CodeChecker.git --depth 1 ~/codechecker
           cd ~/codechecker
 
-          make venv
           # Got 'bdist_wheel' error? No problem. See https://github.com/Ericsson/codechecker/issues/3108#issuecomment-748120874
+          make venv || true
           source ${PWD}/venv/bin/activate
 
-          BUILD_LOGGER_64_BIT_ONLY=YES make package
+          # Build CodeChecker without the web UI.
+          $ BUILD_UI_DIST=NO make package
+
           export PATH="$PWD/build/CodeChecker/bin:$PATH"
           cd ..
 
