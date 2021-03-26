@@ -36,7 +36,7 @@ jobs:
           echo "PACKAGE_NAMES=$(colcon list -nt | tr '\n' ' ')" >> ${GITHUB_ENV}
 
       - name: Run action-ros-ci
-        # continue-on-error: true
+        continue-on-error: true
         uses: ros-tooling/action-ros-ci@v0.2
         with:
           package-name: ${{ env.PACKAGE_NAMES }}
@@ -49,7 +49,7 @@ jobs:
               }
             }
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/1ddb69bedfd1f04c2f000e95452f7c24a4d6176b/index.yaml
-          # extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
+          extra-cmake-args: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-Wthread-safety' -DFORCE_BUILD_VENDOR_PKG=ON
 
       - name: Checkout CodeChecker
         uses: actions/checkout@v2
