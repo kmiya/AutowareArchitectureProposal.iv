@@ -57,7 +57,7 @@ jobs:
 
           # Got 'bdist_wheel' error? No problem. See https://github.com/Ericsson/codechecker/issues/3108#issuecomment-748120874
           make venv || true
-          source ${GITHUB_PATH}/venv/bin/activate
+          source ${GITHUB_PATH}/codechecker/venv/bin/activate
 
           # Build CodeChecker without the web UI.
           BUILD_UI_DIST=NO make package
@@ -66,7 +66,7 @@ jobs:
 
       - name: Analyse using Clang-Tidy
         run: |
-          source ${GITHUB_PATH}/venv/bin/activate
+          source ${GITHUB_PATH}/codechecker/venv/bin/activate
           CodeChecker analyze build/compile_commands.json --config codechecker-config.json --output ./reports
           CodeChecker parse -e html ./reports -o ./public/pr-check/main/tidy-reports --trim-path-prefix ${GITHUB_WORKSPACE}
 
