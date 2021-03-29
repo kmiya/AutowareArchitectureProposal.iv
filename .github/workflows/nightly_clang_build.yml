@@ -19,6 +19,14 @@ jobs:
         with:
           required-ros-distributions: foxy
 
+      - name: debug
+        run: |
+          apt-cache show python3-colcon-core
+          echo "---"
+          apt-cache show python3-colcon-cmake
+          echo "---"
+          colcon version-check
+
       - name: Install Clang-Tidy and OpenMP lib for Clang
         run: |
           # Install deps https://github.com/Ericsson/codechecker/blob/master/.github/workflows/install-deps.sh
