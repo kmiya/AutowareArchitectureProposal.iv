@@ -20,12 +20,11 @@ jobs:
           required-ros-distributions: foxy
 
       - name: debug
+        continue-on-error: true
         run: |
           apt-cache show python3-colcon-core
           echo "---"
           apt-cache show python3-colcon-cmake
-          echo "---"
-          colcon version-check
 
       - name: Install Clang-Tidy and OpenMP lib for Clang
         run: |
@@ -94,7 +93,7 @@ jobs:
           . "${PWD}/venv/bin/activate"
           BUILD_UI_DIST=NO make package || true
 
-      - name: debug
+      - name: debug (search for compile_commands.json)
         run: |
           ls
           echo "---"
