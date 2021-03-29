@@ -1,4 +1,4 @@
-name: Clang(-Tidy) nightly build
+name: Clang-Tidy nightly check
 
 on:
   workflow_dispatch:
