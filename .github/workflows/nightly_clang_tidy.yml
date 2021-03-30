@@ -78,12 +78,30 @@ jobs:
           echo "---"
           find . -name compile_commands.json
 
+      - name: Concatenate compile_commands.json
+        run: |
+          # Remove '[', replace the last '}' into '},', then remove ']'
+          sed -e '/^\[/d' \
+              -e 's/\}$/\},/' \
+              -e '/^\]$/d' \
+              build/**/compile_commands.json \
+              > concat_compile_commands.json
+
+          # Insert '[' and ']' to be JSON compliant
+          sed -e '1i [' \
+              -e '$s/\},/\}\n\]/' \
+              -i concat_compile_commands.json
+
       - name: Analyse using Clang-Tidy
         run: |
           . "${PWD}/codechecker/venv/bin/activate"
           export PATH="${PWD}/codechecker/build/CodeChecker/bin:$PATH"
-          CodeChecker analyze build/compile_commands.json --config codechecker-config.json --output ./reports
-          CodeChecker parse -e html ./reports -o ./public/pr-check/main/tidy-reports --trim-path-prefix ${GITHUB_WORKSPACE}
+          CodeChecker analyze concat_compile_commands.json \
+                      --config codechecker-config.json \
+                      --output ./reports
+          CodeChecker parse -e html ./reports \
+                      -o ./public/pr-check/main/tidy-reports \
+                      --trim-path-prefix ${GITHUB_WORKSPACE}
 
       - name: Deploy analyse results to gh-pages
         uses: peaceiris/actions-gh-pages@v3
