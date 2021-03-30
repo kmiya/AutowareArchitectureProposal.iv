@@ -1,6 +1,6 @@
 {
     "analyzer": [
-        "--jobs=2",
+        "--jobs=1",
         "--clean",
         "--analyzers=clang-tidy",
         "--ignore=codechecker-skipfile.txt",
