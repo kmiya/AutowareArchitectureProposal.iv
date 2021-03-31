@@ -80,7 +80,12 @@ jobs:
 
       - name: Concatenate compile_commands.json
         run: |
-          # Remove '[', replace the last '}' into '},', then remove ']'
+          # colcon-cmake (>= 0.2.20) generates a workspace-level compile_commands.json,
+          # but it does not seem to be generated on the GitHub Actions container.
+          # To mitigate the problem, the followings generate the json file.
+
+          # For each package-level compile_commands.json,
+          # remove '[' and replace the last '}' into '},', then remove ']'
           sed -e '/^\[/d' \
               -e 's/\}$/\},/' \
               -e '/^\]$/d' \
