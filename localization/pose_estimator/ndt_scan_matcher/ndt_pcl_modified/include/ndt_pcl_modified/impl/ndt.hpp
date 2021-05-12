@@ -51,6 +51,8 @@
  *
  */
 
+// test
+
 #ifndef PCL_REGISTRATION_NDT_MODIFIED_IMPL_H_
 #define PCL_REGISTRATION_NDT_MODIFIED_IMPL_H_
 
