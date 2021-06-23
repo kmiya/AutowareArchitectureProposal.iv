@@ -1,4 +1,4 @@
-name: Clang-Tidy nightly check
+name: Clang-Tidy weekly check
 
 on:
   workflow_dispatch:
@@ -6,18 +6,13 @@ on:
     - cron: "0 19 * * sun" # run at 4 AM JST on Sundays
 
 jobs:
-  build-using-clang:
+  clang-tidy-analysis:
     runs-on: ubuntu-latest
-    container: ubuntu:focal
+    container: osrf/ros:foxy-desktop
 
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
-
-      - name: Setup ROS environment
-        uses: ros-tooling/setup-ros@v0.2
-        with:
-          required-ros-distributions: foxy
 
       - name: Install Clang-Tidy
         run: |
@@ -40,7 +35,7 @@ jobs:
             ros-foxy-tf2-ros>=0.13.6-1focal.20201028.172335 \
             ros-foxy-tf2-sensor-msgs>=0.13.6-1focal.20201028.172335
 
-      - name: Build
+      - name: Build packages
         run: |
           . /opt/ros/foxy/setup.sh
           colcon build --event-handlers console_cohesion+ \
@@ -49,6 +44,14 @@ jobs:
                         -DCMAKE_BUILD_TYPE=Release \
                         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
                         --no-warn-unused-cli
+
+      - name: Debug (search for compile_commands.json)
+        run: |
+          ls
+          echo "---"
+          ls build
+          echo "---"
+          find . -name compile_commands.json
 
       - name: Checkout CodeChecker
         uses: actions/checkout@v2
@@ -70,43 +73,16 @@ jobs:
           . "${PWD}/venv/bin/activate"
           BUILD_UI_DIST=NO make package || true
 
-      - name: Debug (search for compile_commands.json)
-        run: |
-          ls
-          echo "---"
-          ls build
-          echo "---"
-          find . -name compile_commands.json
-
-      - name: Concatenate compile_commands.json
-        run: |
-          # colcon-cmake (>= 0.2.20) generates a workspace-level compile_commands.json,
-          # but it does not seem to be generated on the GitHub Actions container.
-          # To mitigate the problem, the followings generate the json file.
-
-          # For each package-level compile_commands.json,
-          # remove '[' and replace the last '}' into '},', then remove ']'
-          sed -e '/^\[/d' \
-              -e 's/\}$/\},/' \
-              -e '/^\]$/d' \
-              build/**/compile_commands.json \
-              > concat_compile_commands.json
-
-          # Insert '[' and ']' to be JSON compliant
-          sed -e '1i [' \
-              -e '$s/\},/\}\n\]/' \
-              -i concat_compile_commands.json
-
       - name: Analyse using Clang-Tidy
         run: |
           . "${PWD}/codechecker/venv/bin/activate"
           export PATH="${PWD}/codechecker/build/CodeChecker/bin:$PATH"
-          CodeChecker analyze concat_compile_commands.json \
+          CodeChecker analyze build/compile_commands.json \
                       --config codechecker-config.json \
-                      --output ./reports
+                      --output ./reports || true
           CodeChecker parse -e html ./reports \
                       -o ./public/pr-check/main/tidy-reports \
-                      --trim-path-prefix ${GITHUB_WORKSPACE}
+                      --trim-path-prefix ${GITHUB_WORKSPACE} || true
 
       - name: Deploy analyse results to gh-pages
         uses: peaceiris/actions-gh-pages@v3
