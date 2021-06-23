@@ -45,14 +45,6 @@ jobs:
                         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
                         --no-warn-unused-cli
 
-      - name: Debug (search for compile_commands.json)
-        run: |
-          ls
-          echo "---"
-          ls build
-          echo "---"
-          find . -name compile_commands.json
-
       - name: Checkout CodeChecker
         uses: actions/checkout@v2
         with:
