@@ -1,9 +1,0 @@
--*/install/*
--*/build/*
--*/log/*
--*/dependency_ws/*
--*/vendor/*
--*/tmp/*
--/usr/include/*
--/usr/local/*
--/opt/*
